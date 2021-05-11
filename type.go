@@ -96,6 +96,8 @@ func New(opts ...Option) *Types {
 	tm["uint32"] = reflect.TypeOf(uint32(0))
 	tm["uint64"] = reflect.TypeOf(uint64(0))
 	tm["uintptr"] = reflect.TypeOf(uintptr(0))
+	tm["byte"] = reflect.TypeOf(byte(0))
+	tm["rune"] = reflect.TypeOf(rune(0))
 	tm["float32"] = reflect.TypeOf(float32(0))
 	tm["float64"] = reflect.TypeOf(float64(0))
 	tm["complex64"] = reflect.TypeOf(complex64(0))
@@ -126,6 +128,25 @@ func (ts *Types) NameByType(t reflect.Type) (name string, ok bool) {
 	return
 }
 
+// AddType defined by source code
+func (ts *Types) AddType(t reflect.Type) (err error) {
+	nm := t.Name()
+	if !ir.MatchString(nm) {
+		return fmt.Errorf("invalid type name: %s", nm)
+	}
+	ts.lk.RLock()
+	_, ok := ts.tm[nm]
+	ts.lk.RUnlock()
+	if ok {
+		return
+	}
+	ts.lk.Lock()
+	defer ts.lk.Unlock()
+	ts.tm[nm] = t
+	ts.tn[t] = nm
+	return
+}
+
 // CreateSchema a schema from definition
 func (ts *Types) CreateSchema(s Schema) (t reflect.Type, err error) {
 	ts.lk.RLock()
@@ -134,11 +155,6 @@ func (ts *Types) CreateSchema(s Schema) (t reflect.Type, err error) {
 	if ok {
 		return
 	}
-	defer func() {
-		if e := recover(); e != nil {
-			err = fmt.Errorf("recovered from: %v", e)
-		}
-	}()
 	ts.lk.Lock()
 	defer ts.lk.Unlock()
 	return ts.createSchema(s)
@@ -152,11 +168,6 @@ func (ts *Types) CreateType(typ string) (t reflect.Type, err error) {
 	if ok {
 		return
 	}
-	defer func() {
-		if e := recover(); e != nil {
-			err = fmt.Errorf("recovered from: %v", e)
-		}
-	}()
 	ts.lk.Lock()
 	defer ts.lk.Unlock()
 	return ts.createType(typ)
@@ -250,7 +261,7 @@ func (ts *Types) createType(typ string) (t reflect.Type, err error) {
 			return nil, err
 		}
 	} else { // unknown
-		err = fmt.Errorf("unknown type: %s", typ)
+		return nil, fmt.Errorf("unknown type: %s", typ)
 	}
 	ts.tm[typ] = t
 	ts.tn[t] = typ
