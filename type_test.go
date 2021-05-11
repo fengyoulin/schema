@@ -14,7 +14,7 @@ const testDef = `
 {"name":"ID","type":"uint","tags":{"json":"id,omitempty"}},
 {"name":"CreatedAt","type":"Time","tags":{"json":"created_at,omitempty"}},
 {"name":"UpdatedAt","type":"Time","tags":{"json":"updated_at,omitempty"}},
-{"name":"DeletedAt","type":"Time","tags":{"json":"deleted_at,omitempty"}},
+{"name":"DeletedAt","type":"NullTime","tags":{"json":"deleted_at,omitempty"}},
 {"name":"UUID","type":"string","tags":{"json":"uuid,omitempty"}},
 {"name":"OpenID","type":"string","tags":{"json":"open_id,omitempty"}},
 {"name":"UnionID","type":"NullString","tags":{"json":"union_id,omitempty"}},
@@ -25,7 +25,7 @@ const testDef = `
 
 var (
 	testTypes *schema.Types
-	testSType reflect.Type
+	testType  reflect.Type
 )
 
 func init() {
@@ -55,7 +55,7 @@ func TestTypes_CreateSchema(t *testing.T) {
 	if tp, err := testTypes.CreateSchema(s); err != nil {
 		t.Error(err)
 	} else {
-		testSType = tp
+		testType = tp
 	}
 }
 
@@ -70,13 +70,13 @@ func TestTypes_TypeByName(t *testing.T) {
 	if !ok {
 		t.Error("not found")
 	}
-	if tp != testSType {
-		t.Errorf("%v != %v", tp, testSType)
+	if tp != testType {
+		t.Errorf("%v != %v", tp, testType)
 	}
 }
 
 func TestTypes_NameByType(t *testing.T) {
-	nm, ok := testTypes.NameByType(testSType)
+	nm, ok := testTypes.NameByType(testType)
 	if !ok {
 		t.Error("not found")
 	}

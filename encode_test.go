@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type testType struct {
+type testStruct struct {
 	ID        uint
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -23,12 +23,12 @@ type testType struct {
 }
 
 var (
-	testObj testType
+	testObj testStruct
 	testEnc map[reflect.Type]func(reflect.Value, *schema.Encoder) error
 )
 
 func init() {
-	testObj = testType{
+	testObj = testStruct{
 		ID:        1,
 		CreatedAt: time.Unix(1620560345, 0),
 		UpdatedAt: time.Unix(1620560345, 0),
@@ -96,4 +96,5 @@ func BenchmarkEncoder_Encode(b *testing.B) {
 			b.Error(err)
 		}
 	}
+	_ = w.Bytes()
 }

@@ -42,7 +42,7 @@ func init() {
 }
 
 func TestDecoder_Decode(t *testing.T) {
-	var o testType
+	var o testStruct
 	d := &schema.Decoder{
 		Reader: bytes.NewBuffer(testBuf),
 		Extend: testDec,
@@ -62,7 +62,7 @@ func BenchmarkDecoder_Decode(b *testing.B) {
 		Types:  testTypes,
 	}
 	for i := 0; i < b.N; i++ {
-		var o testType
+		var o testStruct
 		d.Reader = bytes.NewReader(testBuf)
 		if err := d.Decode(&o); err != nil {
 			b.Error(err)
