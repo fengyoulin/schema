@@ -19,6 +19,7 @@ type testType struct {
 	UnionID   sql.NullString
 	Level     float64
 	Extra     []byte
+	Variable  interface{}
 }
 
 var (
@@ -37,6 +38,7 @@ func init() {
 		UnionID:   sql.NullString{Valid: true, String: "!@#$%^"},
 		Level:     3.14,
 		Extra:     []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 0},
+		Variable:  true,
 	}
 	testEnc = map[reflect.Type]func(reflect.Value, *schema.Encoder) error{
 		reflect.TypeOf(time.Time{}): func(value reflect.Value, encoder *schema.Encoder) error {
@@ -71,6 +73,7 @@ func TestEncoder_Encode(t *testing.T) {
 	e := &schema.Encoder{
 		Writer: b,
 		Extend: testEnc,
+		Types:  testTypes,
 	}
 	if err := e.Encode(&testObj); err != nil {
 		t.Error(err)
@@ -85,6 +88,7 @@ func BenchmarkEncoder_Encode(b *testing.B) {
 	e := &schema.Encoder{
 		Writer: w,
 		Extend: testEnc,
+		Types:  testTypes,
 	}
 	for i := 0; i < b.N; i++ {
 		w.Reset()

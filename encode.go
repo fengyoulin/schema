@@ -12,6 +12,7 @@ import (
 type Encoder struct {
 	io.Writer
 	Extend map[reflect.Type]func(reflect.Value, *Encoder) error
+	Types  *Types
 }
 
 // Encode the data
@@ -144,7 +145,26 @@ func (e *Encoder) InternalEncode(rv reflect.Value) (err error) {
 				return
 			}
 		}
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.UnsafePointer:
+	case reflect.Interface:
+		if rv.IsNil() {
+			if _, err = e.Writer.Write([]byte{0}); err != nil {
+				return
+			}
+		} else {
+			tp := rv.Elem().Type()
+			if e.Types == nil {
+				return fmt.Errorf("unknown type: %s", tp.String())
+			}
+			nm, ok := e.Types.NameByType(tp)
+			if !ok {
+				return fmt.Errorf("unknown type: %s", tp.String())
+			}
+			if err = e.InternalEncode(reflect.ValueOf(&nm).Elem()); err != nil {
+				return
+			}
+			return e.InternalEncode(rv.Elem())
+		}
+	case reflect.Chan, reflect.Func, reflect.UnsafePointer:
 		fallthrough
 	default:
 		return fmt.Errorf("unexpected kind: %v", rv.Kind())

@@ -12,6 +12,7 @@ import (
 type Decoder struct {
 	io.Reader
 	Extend map[reflect.Type]func(reflect.Value, *Decoder) error
+	Types  *Types
 }
 
 // Decode the data
@@ -174,7 +175,28 @@ func (d *Decoder) InternalDecode(rv reflect.Value) (err error) {
 		if err = d.InternalDecode(rv.Elem()); err != nil {
 			return
 		}
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.UnsafePointer:
+	case reflect.Interface:
+		var nm string
+		if err = d.InternalDecode(reflect.ValueOf(&nm).Elem()); err != nil {
+			return
+		}
+		if nm == "" {
+			return
+		}
+		if d.Types == nil {
+			return fmt.Errorf("unknown type: %s", nm)
+		}
+		var tp reflect.Type
+		tp, err = d.Types.CreateType(nm)
+		if err != nil {
+			return
+		}
+		val := reflect.New(tp).Elem()
+		if err = d.InternalDecode(val); err != nil {
+			return
+		}
+		rv.Set(val)
+	case reflect.Chan, reflect.Func, reflect.UnsafePointer:
 		fallthrough
 	default:
 		return fmt.Errorf("unexpected kind: %T", rv.Kind())
