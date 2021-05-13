@@ -9,12 +9,12 @@ goos: windows
 goarch: amd64
 pkg: github.com/fengyoulin/schema
 cpu: Intel(R) Core(TM) i7-8650U CPU @ 1.90GHz
-BenchmarkJsonEncode-8             397910              2911 ns/op
-BenchmarkJsonDecode-8             182155              6803 ns/op
-BenchmarkGobEncode-8              127317              9187 ns/op
-BenchmarkGobDecode-8               35047             34652 ns/op
-BenchmarkDecoder_Decode-8         633194              1766 ns/op
-BenchmarkEncoder_Encode-8         924028              1305 ns/op
+BenchmarkJsonEncode-8             356102              2912 ns/op
+BenchmarkJsonDecode-8             169387              6779 ns/op
+BenchmarkGobEncode-8              134079              9056 ns/op
+BenchmarkGobDecode-8               34712             34470 ns/op
+BenchmarkDecoder_Decode-8         750661              1567 ns/op
+BenchmarkEncoder_Encode-8        1000000              1100 ns/op
 PASS
-ok      github.com/fengyoulin/schema    7.735s
+ok      github.com/fengyoulin/schema    7.507s
 ```
