@@ -97,6 +97,17 @@ func (e *Encoder) InternalEncode(rv reflect.Value) (err error) {
 		if _, err = e.Writer.Write(buf[:n]); err != nil {
 			return
 		}
+		switch rv.Type().Elem().Kind() {
+		case reflect.Int8, reflect.Uint8, reflect.Bool:
+			var b []byte
+			*(*reflect.SliceHeader)(unsafe.Pointer(&b)) = reflect.SliceHeader{
+				Data: rv.Pointer(),
+				Len:  rv.Len(),
+				Cap:  rv.Cap(),
+			}
+			_, err = e.Writer.Write(b)
+			return
+		}
 		for x := 0; x < int(l); x++ {
 			if err = e.InternalEncode(rv.Index(x)); err != nil {
 				return

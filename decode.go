@@ -125,6 +125,22 @@ func (d *Decoder) InternalDecode(rv reflect.Value) (err error) {
 		} else {
 			rv.SetLen(int(i))
 		}
+		switch rv.Type().Elem().Kind() {
+		case reflect.Int8, reflect.Uint8, reflect.Bool:
+			var b []byte
+			*(*reflect.SliceHeader)(unsafe.Pointer(&b)) = reflect.SliceHeader{
+				Data: rv.Pointer(),
+				Len:  rv.Len(),
+				Cap:  rv.Cap(),
+			}
+			var n int
+			if n, err = d.Reader.Read(b); err != nil {
+				return
+			} else if n != int(i) {
+				return io.EOF
+			}
+			return
+		}
 		for x := 0; x < int(i); x++ {
 			if err = d.InternalDecode(rv.Index(x)); err != nil {
 				return
